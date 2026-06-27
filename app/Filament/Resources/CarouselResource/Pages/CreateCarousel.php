@@ -10,6 +10,8 @@ class CreateCarousel extends CreateRecord
 {
     protected static string $resource = CarouselResource::class;
 
+    public bool $hasUnsavedChangesAlert = true;
+
     // Forces redirect back to the list
     protected function getRedirectUrl(): string
     {
