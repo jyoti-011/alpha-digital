@@ -12,13 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('carousels', function (Blueprint $table) {
-            $table->string('status')->default('draft')->after('is_active');
+            //
         });
-
-        // Copy existing data
-        \DB::table('carousels')->update([
-            'status' => \DB::raw("IF(is_active = 1, 'published', 'draft')")
-        ]);
     }
 
     /**
@@ -27,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('carousels', function (Blueprint $table) {
-            $table->dropColumn('status');
+            //
         });
     }
 };

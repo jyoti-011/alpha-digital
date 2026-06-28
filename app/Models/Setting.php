@@ -27,13 +27,9 @@ class Setting extends Model
         'youtube_link',
         'policy_privacy_link', 
         'terms_service_link', 
-        'shipping_returns_link',
-        'carousel_settings'
+        'shipping_returns_link'
     ];
 
-    protected $casts = [
-        'carousel_settings' => 'array',
-    ];
     use \App\Traits\OptimizesImages;
 
     public static function getSiteSettings()
