@@ -1,191 +1,145 @@
 <x-layouts.app>
-    @php
-        $siteSettings = \App\Models\Setting::getSiteSettings();
-        $cSettings = $siteSettings->carousel_settings ?? [];
-        $autoplayDelay = $cSettings['autoplay_speed'] ?? 6500;
-        $transitionDuration = $cSettings['transition_speed'] ?? 700;
-        $loop = ($cSettings['infinite_loop'] ?? true) ? 'true' : 'false';
-        $pauseOnHover = ($cSettings['pause_on_hover'] ?? true) ? 'true' : 'false';
-        $showPagination = $cSettings['show_pagination'] ?? true;
-        $showNavigation = $cSettings['show_navigation'] ?? true;
-    @endphp
-    <section class="hero w-full relative overflow-hidden mt-[76px] h-[500px] md:h-[650px] lg:h-[700px]" 
+    <section class="hero bg-black" 
              x-data="{
+                 activeSlide: 0,
+                 visibleSlide: 0,
+                 totalSlides: {{ $carousels->count() }},
+                 autoPlayInterval: null,
+                 touchStartX: 0,
+                 transitionTimeout1: null,
+                 
                  init() {
-                     if(window.Swiper) {
-                         this.initSwiper();
-                     } else {
-                         setTimeout(() => this.initSwiper(), 500); // Wait for vite to load
-                     }
+                     if(this.totalSlides <= 1) return;
+                     this.startAutoPlay();
                  },
-                 initSwiper() {
-                     new window.Swiper('.swiper', {
-                         effect: 'fade',
-                         fadeEffect: { crossFade: true },
-                         speed: {{ $transitionDuration }},
-                         loop: {{ $loop }},
-                         autoplay: {
-                             delay: {{ $autoplayDelay }},
-                             disableOnInteraction: false,
-                             pauseOnMouseEnter: {{ $pauseOnHover }},
-                         },
-                         keyboard: { enabled: true },
-                         @if($showNavigation)
-                         navigation: {
-                             nextEl: '.swiper-button-next',
-                             prevEl: '.swiper-button-prev',
-                         },
-                         @endif
-                         @if($showPagination)
-                         pagination: {
-                             el: '.swiper-pagination',
-                             clickable: true,
-                         },
-                         @endif
-                         on: {
-                             slideChangeTransitionStart: function () {
-                                 let slides = this.slides;
-                                 for(let i=0; i<slides.length; i++) {
-                                     let content = slides[i].querySelector('.hero-content');
-                                     let img = slides[i].querySelector('img');
-                                     if(content) content.classList.remove('animate-fade-up', 'animate-fade-left', 'animate-fade-right');
-                                     if(img) img.classList.remove('animate-ken-burns');
-                                 }
-                             },
-                             slideChangeTransitionEnd: function () {
-                                 let activeSlide = this.slides[this.activeIndex];
-                                 let content = activeSlide.querySelector('.hero-content');
-                                 let img = activeSlide.querySelector('img');
-                                 if(content) {
-                                     let anim = content.dataset.animation || 'fade-up';
-                                     if(anim !== 'none') content.classList.add('animate-' + anim);
-                                 }
-                                 if(img && img.dataset.kenburns === '1') {
-                                     img.classList.add('animate-ken-burns');
-                                 }
-                             }
+                 startAutoPlay() {
+                     this.autoPlayInterval = setInterval(() => { this.next() }, 5000);
+                 },
+                 resetAutoPlay() {
+                     clearInterval(this.autoPlayInterval);
+                     this.startAutoPlay();
+                 },
+                 next() {
+                     if(this.totalSlides <= 1) return;
+                     this.changeSlide((this.activeSlide + 1) % this.totalSlides);
+                 },
+                 prev() {
+                     if(this.totalSlides <= 1) return;
+                     this.changeSlide((this.activeSlide - 1 + this.totalSlides) % this.totalSlides);
+                 },
+                 goTo(index) {
+                     if(this.activeSlide === index) return;
+                     this.changeSlide(index);
+                 },
+                 changeSlide(newIndex) {
+                     // Clear any pending transitions so manual clicks are instant
+                     clearTimeout(this.transitionTimeout1);
+                     
+                     this.activeSlide = newIndex;
+                     this.resetAutoPlay();
+                     
+                     // Fade out current slide
+                     this.visibleSlide = null;
+                     
+                     // Wait for fade out + short black screen, then fade in new slide
+                     this.transitionTimeout1 = setTimeout(() => {
+                         this.visibleSlide = newIndex;
+                     }, 450); // 400ms fade out + 50ms black
+                 },
+                 handleTouchStart(e) {
+                     this.touchStartX = e.touches[0].clientX;
+                 },
+                 handleTouchEnd(e) {
+                     const touchEndX = e.changedTouches[0].clientX;
+                     const diff = this.touchStartX - touchEndX;
+                     
+                     if (Math.abs(diff) > 50) {
+                         if (diff > 0) {
+                             this.next();
+                         } else {
+                             this.prev();
                          }
-                     });
+                     }
                  }
              }">
+    <div class="hero-slides w-full h-full relative group" 
+         @touchstart="handleTouchStart" 
+         @touchend="handleTouchEnd">
         
-        <div class="swiper w-full h-full">
-            <div class="swiper-wrapper">
-                @foreach($carousels as $index => $carousel)
-                    @php
-                        $layout = $carousel->layout_settings ?? [];
-                        $design = $carousel->design_settings ?? [];
-                        $anim = $carousel->animation_settings ?? [];
-                        
-                        $desktopPos = $layout['desktop_position'] ?? 'left';
-                        $mobilePos = $layout['mobile_position'] ?? 'center';
-                        $textAlign = $layout['text_alignment'] ?? 'left';
-                        $imgFocus = $layout['image_focus_position'] ?? 'center';
-                        
-                        // Justification classes
-                        $justifyDesktop = $desktopPos === 'left' ? 'md:justify-start' : ($desktopPos === 'right' ? 'md:justify-end' : 'md:justify-center');
-                        $justifyMobile = $mobilePos === 'left' ? 'justify-start' : ($mobilePos === 'right' ? 'justify-end' : 'justify-center');
-                        
-                        // Text alignment classes
-                        $alignClass = $textAlign === 'left' ? 'text-left' : ($textAlign === 'right' ? 'text-right' : 'text-center');
-                    @endphp
-                    <div class="swiper-slide w-full h-full relative flex items-center px-6 md:px-[10%] {{ $justifyMobile }} {{ $justifyDesktop }}">
-                        
-                        <picture>
-                            @if($carousel->image_mobile)
-                            <source media="(max-width: 768px)" srcset="{{ asset('storage/' . $carousel->image_mobile) }}">
-                            @endif
-                            <img src="{{ asset('storage/' . $carousel->image) }}"
-                                 alt="{{ $carousel->seo_alt_text ?? $carousel->heading ?? 'Alpha Digital Saree Collection' }}"
-                                 @if($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
-                                 data-kenburns="{{ ($anim['ken_burns'] ?? true) ? '1' : '0' }}"
-                                 class="absolute inset-0 w-full h-full object-cover z-0 {{ $index === 0 && ($anim['ken_burns'] ?? true) ? 'animate-ken-burns' : '' }}"
-                                 style="object-position: {{ $imgFocus }};">
-                        </picture>
-                        
-                        <!-- Overlay -->
-                        <div class="absolute inset-0 z-[1]" 
-                             style="background-color: {{ $design['overlay']['color'] ?? '#000000' }}; opacity: {{ $design['overlay']['opacity'] ?? 0.22 }}"></div>
-                        
-                        <!-- Content -->
-                        <div class="hero-content relative z-[2] w-full transition-all flex flex-col gap-3 {{ $alignClass }} {{ $index === 0 ? 'animate-'.($anim['type'] ?? 'fade-up') : 'opacity-0' }} max-w-[600px]"
-                             data-animation="{{ $anim['type'] ?? 'fade-up' }}"
-                             style="animation-delay: {{ $anim['delay'] ?? 200 }}ms; animation-duration: {{ $anim['duration'] ?? 700 }}ms;">
-                            
-                            @if($carousel->collection_tag)
-                                <p class="uppercase font-bold tracking-widest m-0" 
-                                   style="color: {{ $design['text']['body_color'] ?? '#F5F5F5' }}; font-size: {{ $layout['tag_size'] ?? 16 }}px;">
-                                    {{ $carousel->collection_tag }}
-                                </p>
-                            @endif
-
-                            @if($carousel->heading)
-                                <h1 class="font-serif leading-tight drop-shadow-md m-0"
-                                    style="color: {{ $design['text']['heading_color'] ?? '#FFFFFF' }}; font-size: clamp(32px, 5vw, {{ $layout['heading_size'] ?? 60 }}px);">
-                                    {{ $carousel->heading }}
-                                </h1>
-                            @endif
-
-                            @if($carousel->sub_heading)
-                                <p class="font-sans leading-snug tracking-wide m-0"
-                                   style="color: {{ $design['text']['body_color'] ?? '#F5F5F5' }}; font-size: clamp(16px, 3vw, {{ $layout['subtitle_size'] ?? 22 }}px);">
-                                    {{ $carousel->sub_heading }}
-                                </p>
-                            @endif
-
-                            @if($carousel->button_text && $carousel->button_link)
-                                @php
-                                    $btnStyle = $design['button']['style'] ?? 'filled';
-                                    $btnBg = $btnStyle === 'filled' ? ($design['button']['bg'] ?? '#FFFFFF') : 'transparent';
-                                    $btnText = $design['button']['text'] ?? '#000000';
-                                    $btnBorder = $btnStyle === 'outline' ? ($design['button']['border'] ?? '#FFFFFF') : 'transparent';
-                                    $btnRadius = $design['button']['radius'] ?? 0;
-                                    $btnSize = $design['button']['size'] ?? 'md';
-                                    $btnPadding = $btnSize === 'sm' ? 'py-2 px-6' : ($btnSize === 'lg' ? 'py-4 px-12 text-lg' : 'py-3 px-8');
-                                    $btnWidth = $design['button']['width'] ?? 'auto';
-                                    
-                                    $wrapperWidthClass = $btnWidth === 'full' ? 'w-full md:w-auto' : 'w-auto';
-                                    $btnWidthClass = $btnWidth === 'full' ? 'w-full block text-center md:inline-block md:w-auto' : 'inline-block w-auto text-center';
-                                @endphp
-                                <div class="mt-4 flex {{ $textAlign === 'center' ? 'justify-center' : ($textAlign === 'right' ? 'justify-end' : 'justify-start') }} {{ $wrapperWidthClass }}">
-                                    <a href="{{ $carousel->button_link }}" 
-                                       class="no-underline font-sans font-bold uppercase tracking-[2px] transition-all duration-300 {{ $btnPadding }} {{ $btnWidthClass }}"
-                                       style="background-color: {{ $btnBg }}; color: {{ $btnText }}; border: 1.5px solid {{ $btnBorder }}; border-radius: {{ $btnRadius }}px;"
-                                       onmouseover="this.style.backgroundColor='{{ $design['button']['hover_color'] ?? '#EEEEEE' }}'; this.style.color='{{ $btnText }}';"
-                                       onmouseout="this.style.backgroundColor='{{ $btnBg }}'; this.style.color='{{ $btnText }}';">
-                                        {{ $carousel->button_text }}
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
+        @foreach($carousels as $index => $carousel)
+            <div class="slide flex items-center justify-center text-center md:justify-start md:text-left px-6 md:px-[10%] transition-opacity duration-[400ms] ease-in-out" 
+                 :class="{ '!opacity-100 z-10 pointer-events-auto': visibleSlide === {{ $index }}, '!opacity-0 z-0 pointer-events-none': visibleSlide !== {{ $index }} }">
+                 
+                <picture>
+                    @if($carousel->image_mobile)
+                    <source media="(max-width: 768px)" srcset="{{ asset('storage/' . $carousel->image_mobile) }}">
+                    @endif
+                    @if($carousel->image_tablet)
+                    <source media="(min-width: 769px) and (max-width: 1024px)" srcset="{{ asset('storage/' . $carousel->image_tablet) }}">
+                    @endif
+                    <img src="{{ asset('storage/' . $carousel->image) }}"
+                         alt="{{ $carousel->heading ?? 'Alpha Digital Saree Collection' }}"
+                         @if($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
+                         class="absolute inset-0 w-full h-full object-cover z-0">
+                </picture>
                 
-                @if($carousels->count() === 0)
-                    <div class="swiper-slide w-full h-full flex items-center justify-center bg-black">
-                        <img src="{{ asset('images/carousel1.webp') }}"
-                             alt="Welcome to Our Store" 
-                             class="absolute inset-0 w-full h-full object-cover z-0 opacity-80">
-                        <div class="relative z-[2] text-white text-center">
-                            <h1 class="text-4xl md:text-5xl font-serif">Alpha Digital</h1>
-                        </div>
-                    </div>
-                @endif
+                <div class="hero-content relative z-[2] w-full max-w-[500px] transition-all duration-[600ms] ease-out"
+                     :class="{ 'translate-y-0 opacity-100 delay-[200ms]': visibleSlide === {{ $index }}, 'translate-y-8 opacity-0 delay-0': visibleSlide !== {{ $index }} }">
+                    
+                    @if($carousel->sub_heading)
+                        <p class="subtitle text-sm md:text-base text-white tracking-widest mb-2">{{ $carousel->sub_heading }}</p>
+                    @endif
+
+                    @if($carousel->heading)
+                        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal my-2 md:my-4 leading-tight drop-shadow-md text-white">{{ $carousel->heading }}</h1>
+                    @endif
+
+                    @if($carousel->text)
+                        <p class="text-sm md:text-base mb-6 md:mb-8 leading-relaxed text-white">{{ $carousel->text }}</p>
+                    @endif
+
+                    @if($carousel->button_text && $carousel->button_link)
+                        <a href="{{ $carousel->button_link }}" class="btn-primary inline-block no-underline">
+                            {{ $carousel->button_text }}
+                        </a>
+                    @endif
+
+                </div>
             </div>
+        @endforeach
+        
+        @if($carousels->count() === 0)
+            <div class="slide flex items-center justify-center text-center md:justify-start md:text-left px-6 md:px-[10%] transition-opacity duration-[600ms] !opacity-100 z-10">
+                <img src="{{ asset('images/carousel1.webp') }}"
+                     alt="Welcome to Our Store" 
+                     fetchpriority="high" loading="eager" 
+                     class="absolute inset-0 w-full h-full object-cover z-0">
+            </div>
+        @endif
 
-            @if($carousels->count() > 1)
-                @if($showNavigation)
-                <!-- Navigation -->
-                <div class="swiper-button-next hidden sm:flex"></div>
-                <div class="swiper-button-prev hidden sm:flex"></div>
-                @endif
-                
-                @if($showPagination)
-                <!-- Pagination -->
-                <div class="swiper-pagination mb-2"></div>
-                @endif
-            @endif
-        </div>
+        @if($carousels->count() > 1)
+            <!-- Navigation Arrows -->
+            <button aria-label="Previous Slide" @click.prevent="prev()" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 text-white/70 hover:border-white hover:text-white hover:bg-white/10 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm hidden sm:flex items-center justify-center">
+                <svg aria-hidden="true" class="w-5 h-5 md:w-6 md:h-6 ml-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button aria-label="Next Slide" @click.prevent="next()" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 text-white/70 hover:border-white hover:text-white hover:bg-white/10 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm hidden sm:flex items-center justify-center">
+                <svg aria-hidden="true" class="w-5 h-5 md:w-6 md:h-6 mr-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+
+            <!-- Dot Indicators -->
+            <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 md:gap-2">
+                @foreach($carousels as $index => $carousel)
+                    <button @click.prevent="goTo({{ $index }})" 
+                            aria-label="Go to slide {{ $index + 1 }}"
+                            class="group p-2 flex items-center justify-center focus:outline-none">
+                        <span class="h-1.5 md:h-2 rounded-full transition-all duration-500 ease-out shadow-sm"
+                              :class="activeSlide === {{ $index }} ? 'w-8 md:w-10 bg-white' : 'w-1.5 md:w-2 bg-white/40 group-hover:bg-white/70'">
+                        </span>
+                    </button>
+                @endforeach
+            </div>
+        @endif
+    </div>
     </section>
 
     <section class="content-section bg-neutral">

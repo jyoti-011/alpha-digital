@@ -39,24 +39,6 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// --- CAROUSEL PREVIEW ---
-Route::get('/carousel/preview/{id}', function ($id) {
-    if (!auth()->guard('web')->check() && !auth()->check()) {
-        // Basic check, though Filament usually uses 'web' or similar. 
-        // We can just rely on the ID since it's a temporary preview, but ideally we'd check admin auth.
-        // For simplicity and since it's an admin feature, we'll just fetch it.
-    }
-    
-    $carousel = Carousel::findOrFail($id);
-    
-    return view('home', [
-        'carousels' => collect([$carousel]), // Inject just this one slide
-        'bestSellers' => collect(), // Empty to speed up preview
-        'latestCollection' => collect(),
-    ]);
-})->name('carousel.preview')->middleware('web'); // Should be accessible to admins
-
-
 // --- SHOP PAGES ---
 Route::get('/all-sarees', Index::class)->name('shop.index');
 Route::get('/new-arrival', NewArrival::class)->name('shop.new-arrival');

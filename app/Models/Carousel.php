@@ -9,44 +9,19 @@ class Carousel extends Model
     protected $fillable = [
         'image',
         'image_mobile',
-        'collection_tag',
+        'image_tablet',
         'heading',
         'sub_heading',
+        'text',
         'button_text',
         'button_link',
-        'seo_alt_text',
-        'pinned',
-        'start_date',
-        'end_date',
-        'layout_settings',
-        'design_settings',
-        'animation_settings',
         'status',
         'sort_order',
     ];
     use \App\Traits\OptimizesImages;
 
     protected $casts = [
-        'pinned' => 'boolean',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
-        'layout_settings' => 'array',
-        'design_settings' => 'array',
-        'animation_settings' => 'array',
     ];
-
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'published')
-                     ->where(function ($q) {
-                         $q->whereNull('start_date')
-                           ->orWhere('start_date', '<=', now());
-                     })
-                     ->where(function ($q) {
-                         $q->whereNull('end_date')
-                           ->orWhere('end_date', '>=', now());
-                     });
-    }
 
     protected static function booted()
     {
