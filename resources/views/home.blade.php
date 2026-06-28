@@ -1,145 +1,161 @@
 <x-layouts.app>
-    <section class="hero bg-black" 
-             x-data="{
-                 activeSlide: 0,
-                 visibleSlide: 0,
-                 totalSlides: {{ $carousels->count() }},
-                 autoPlayInterval: null,
-                 touchStartX: 0,
-                 transitionTimeout1: null,
-                 
-                 init() {
-                     if(this.totalSlides <= 1) return;
-                     this.startAutoPlay();
-                 },
-                 startAutoPlay() {
-                     this.autoPlayInterval = setInterval(() => { this.next() }, 5000);
-                 },
-                 resetAutoPlay() {
-                     clearInterval(this.autoPlayInterval);
-                     this.startAutoPlay();
-                 },
-                 next() {
-                     if(this.totalSlides <= 1) return;
-                     this.changeSlide((this.activeSlide + 1) % this.totalSlides);
-                 },
-                 prev() {
-                     if(this.totalSlides <= 1) return;
-                     this.changeSlide((this.activeSlide - 1 + this.totalSlides) % this.totalSlides);
-                 },
-                 goTo(index) {
-                     if(this.activeSlide === index) return;
-                     this.changeSlide(index);
-                 },
-                 changeSlide(newIndex) {
-                     // Clear any pending transitions so manual clicks are instant
-                     clearTimeout(this.transitionTimeout1);
-                     
-                     this.activeSlide = newIndex;
-                     this.resetAutoPlay();
-                     
-                     // Fade out current slide
-                     this.visibleSlide = null;
-                     
-                     // Wait for fade out + short black screen, then fade in new slide
-                     this.transitionTimeout1 = setTimeout(() => {
-                         this.visibleSlide = newIndex;
-                     }, 450); // 400ms fade out + 50ms black
-                 },
-                 handleTouchStart(e) {
-                     this.touchStartX = e.touches[0].clientX;
-                 },
-                 handleTouchEnd(e) {
-                     const touchEndX = e.changedTouches[0].clientX;
-                     const diff = this.touchStartX - touchEndX;
-                     
-                     if (Math.abs(diff) > 50) {
-                         if (diff > 0) {
-                             this.next();
-                         } else {
-                             this.prev();
-                         }
-                     }
-                 }
-             }">
-    <div class="hero-slides w-full h-full relative group" 
-         @touchstart="handleTouchStart" 
-         @touchend="handleTouchEnd">
-        
-        @foreach($carousels as $index => $carousel)
-            <div class="slide flex items-center justify-center text-center md:justify-start md:text-left px-6 md:px-[10%] transition-opacity duration-[400ms] ease-in-out" 
-                 :class="{ '!opacity-100 z-10 pointer-events-auto': visibleSlide === {{ $index }}, '!opacity-0 z-0 pointer-events-none': visibleSlide !== {{ $index }} }">
-                 
-                <picture>
-                    @if($carousel->image_mobile)
-                    <source media="(max-width: 768px)" srcset="{{ asset('storage/' . $carousel->image_mobile) }}">
-                    @endif
-                    @if($carousel->image_tablet)
-                    <source media="(min-width: 769px) and (max-width: 1024px)" srcset="{{ asset('storage/' . $carousel->image_tablet) }}">
-                    @endif
-                    <img src="{{ asset('storage/' . $carousel->image) }}"
-                         alt="{{ $carousel->heading ?? 'Alpha Digital Saree Collection' }}"
-                         @if($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
-                         class="absolute inset-0 w-full h-full object-cover z-0">
-                </picture>
-                
-                <div class="hero-content relative z-[2] w-full max-w-[500px] transition-all duration-[600ms] ease-out"
-                     :class="{ 'translate-y-0 opacity-100 delay-[200ms]': visibleSlide === {{ $index }}, 'translate-y-8 opacity-0 delay-0': visibleSlide !== {{ $index }} }">
-                    
-                    @if($carousel->sub_heading)
-                        <p class="subtitle text-sm md:text-base text-white tracking-widest mb-2">{{ $carousel->sub_heading }}</p>
-                    @endif
+    <section class="hero bg-black" x-data="{
+        activeSlide: 0,
+        visibleSlide: 0,
+        totalSlides: {{ $carousels->count() }},
+        autoPlayInterval: null,
+        touchStartX: 0,
+        transitionTimeout1: null,
+    
+        init() {
+            if (this.totalSlides <= 1) return;
+            this.startAutoPlay();
+        },
+        startAutoPlay() {
+            this.autoPlayInterval = setInterval(() => { this.next() }, 5000);
+        },
+        resetAutoPlay() {
+            clearInterval(this.autoPlayInterval);
+            this.startAutoPlay();
+        },
+        next() {
+            if (this.totalSlides <= 1) return;
+            this.changeSlide((this.activeSlide + 1) % this.totalSlides);
+        },
+        prev() {
+            if (this.totalSlides <= 1) return;
+            this.changeSlide((this.activeSlide - 1 + this.totalSlides) % this.totalSlides);
+        },
+        goTo(index) {
+            if (this.activeSlide === index) return;
+            this.changeSlide(index);
+        },
+        changeSlide(newIndex) {
+            // Clear any pending transitions so manual clicks are instant
+            clearTimeout(this.transitionTimeout1);
+    
+            this.activeSlide = newIndex;
+            this.resetAutoPlay();
+    
+            // Fade out current slide
+            this.visibleSlide = null;
+    
+            // Wait for fade out + short black screen, then fade in new slide
+            this.transitionTimeout1 = setTimeout(() => {
+                this.visibleSlide = newIndex;
+            }, 450); // 400ms fade out + 50ms black
+        },
+        handleTouchStart(e) {
+            this.touchStartX = e.touches[0].clientX;
+        },
+        handleTouchEnd(e) {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = this.touchStartX - touchEndX;
+    
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+            }
+        }
+    }">
+        <div class="hero-slides group relative h-full w-full" @touchstart="handleTouchStart" @touchend="handleTouchEnd">
 
-                    @if($carousel->heading)
-                        <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal my-2 md:my-4 leading-tight drop-shadow-md text-white">{{ $carousel->heading }}</h1>
-                    @endif
+            @foreach ($carousels as $index => $carousel)
+                <div class="slide flex items-center justify-center px-6 text-center transition-opacity duration-[400ms] ease-in-out md:justify-start md:px-[10%] md:text-left"
+                    :class="{ '!opacity-100 z-10 pointer-events-auto': visibleSlide ===
+                        {{ $index }}, '!opacity-0 z-0 pointer-events-none': visibleSlide !==
+                        {{ $index }} }">
 
-                    @if($carousel->text)
-                        <p class="text-sm md:text-base mb-6 md:mb-8 leading-relaxed text-white">{{ $carousel->text }}</p>
-                    @endif
+                    <picture>
+                        @if ($carousel->image_mobile)
+                            <source media="(max-width: 768px)" srcset="{{ asset('storage/' . $carousel->image_mobile) }}">
+                        @endif
+                        @if ($carousel->image_tablet)
+                            <source media="(min-width: 769px) and (max-width: 1024px)"
+                                srcset="{{ asset('storage/' . $carousel->image_tablet) }}">
+                        @endif
+                        <img src="{{ asset('storage/' . $carousel->image) }}"
+                            alt="{{ $carousel->heading ?? 'Alpha Digital Saree Collection' }}"
+                            @if ($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
+                            class="absolute inset-0 z-0 h-full w-full object-cover">
+                    </picture>
 
-                    @if($carousel->button_text && $carousel->button_link)
-                        <a href="{{ $carousel->button_link }}" class="btn-primary inline-block no-underline">
-                            {{ $carousel->button_text }}
-                        </a>
-                    @endif
+                    <div class="hero-content relative z-[2] w-full max-w-[500px] transition-all duration-[600ms] ease-out"
+                        :class="{ 'translate-y-0 opacity-100 delay-[200ms]': visibleSlide ===
+                            {{ $index }}, 'translate-y-8 opacity-0 delay-0': visibleSlide !==
+                            {{ $index }} }">
 
+                        @if ($carousel->sub_heading)
+                            <p class="subtitle mb-2 text-sm tracking-widest text-white md:text-base">
+                                {{ $carousel->sub_heading }}</p>
+                        @endif
+
+                        @if ($carousel->heading)
+                            <h1
+                                class="my-2 text-3xl font-normal leading-tight text-white drop-shadow-md sm:text-4xl md:my-4 md:text-5xl lg:text-6xl">
+                                {{ $carousel->heading }}</h1>
+                        @endif
+
+                        @if ($carousel->text)
+                            <p class="mb-6 text-sm leading-relaxed text-white md:mb-8 md:text-base">
+                                {{ $carousel->text }}</p>
+                        @endif
+
+                        @if ($carousel->button_text && $carousel->button_link)
+                            <a href="{{ $carousel->button_link }}" class="btn-primary inline-block no-underline">
+                                {{ $carousel->button_text }}
+                            </a>
+                        @endif
+
+                    </div>
                 </div>
-            </div>
-        @endforeach
-        
-        @if($carousels->count() === 0)
-            <div class="slide flex items-center justify-center text-center md:justify-start md:text-left px-6 md:px-[10%] transition-opacity duration-[600ms] !opacity-100 z-10">
-                <img src="{{ asset('images/carousel1.webp') }}"
-                     alt="Welcome to Our Store" 
-                     fetchpriority="high" loading="eager" 
-                     class="absolute inset-0 w-full h-full object-cover z-0">
-            </div>
-        @endif
+            @endforeach
 
-        @if($carousels->count() > 1)
-            <!-- Navigation Arrows -->
-            <button aria-label="Previous Slide" @click.prevent="prev()" class="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 text-white/70 hover:border-white hover:text-white hover:bg-white/10 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm hidden sm:flex items-center justify-center">
-                <svg aria-hidden="true" class="w-5 h-5 md:w-6 md:h-6 ml-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 19l-7-7 7-7"></path></svg>
-            </button>
-            <button aria-label="Next Slide" @click.prevent="next()" class="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/30 text-white/70 hover:border-white hover:text-white hover:bg-white/10 transition-all duration-300 opacity-0 group-hover:opacity-100 backdrop-blur-sm hidden sm:flex items-center justify-center">
-                <svg aria-hidden="true" class="w-5 h-5 md:w-6 md:h-6 mr-[-2px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5l7 7-7 7"></path></svg>
-            </button>
+            @if ($carousels->count() === 0)
+                <div
+                    class="slide z-10 flex items-center justify-center px-6 text-center !opacity-100 transition-opacity duration-[600ms] md:justify-start md:px-[10%] md:text-left">
+                    <img src="{{ asset('images/carousel1.webp') }}" alt="Welcome to Our Store" fetchpriority="high"
+                        loading="eager" class="absolute inset-0 z-0 h-full w-full object-cover">
+                </div>
+            @endif
 
-            <!-- Dot Indicators -->
-            <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1 md:gap-2">
-                @foreach($carousels as $index => $carousel)
-                    <button @click.prevent="goTo({{ $index }})" 
+            @if ($carousels->count() > 1)
+                <!-- Navigation Arrows -->
+                <button aria-label="Previous Slide" @click.prevent="prev()"
+                    class="absolute left-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 text-white/70 opacity-0 backdrop-blur-sm transition-all duration-300 hover:border-white hover:bg-white/10 hover:text-white group-hover:opacity-100 sm:flex md:left-8 md:h-14 md:w-14">
+                    <svg aria-hidden="true" class="ml-[-2px] h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 19l-7-7 7-7">
+                        </path>
+                    </svg>
+                </button>
+                <button aria-label="Next Slide" @click.prevent="next()"
+                    class="absolute right-4 top-1/2 z-20 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 text-white/70 opacity-0 backdrop-blur-sm transition-all duration-300 hover:border-white hover:bg-white/10 hover:text-white group-hover:opacity-100 sm:flex md:right-8 md:h-14 md:w-14">
+                    <svg aria-hidden="true" class="mr-[-2px] h-5 w-5 md:h-6 md:w-6" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+
+                <!-- Dot Indicators -->
+                <div
+                    class="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-1 md:bottom-10 md:gap-2">
+                    @foreach ($carousels as $index => $carousel)
+                        <button @click.prevent="goTo({{ $index }})"
                             aria-label="Go to slide {{ $index + 1 }}"
-                            class="group p-2 flex items-center justify-center focus:outline-none">
-                        <span class="h-1.5 md:h-2 rounded-full transition-all duration-500 ease-out shadow-sm"
-                              :class="activeSlide === {{ $index }} ? 'w-8 md:w-10 bg-white' : 'w-1.5 md:w-2 bg-white/40 group-hover:bg-white/70'">
-                        </span>
-                    </button>
-                @endforeach
-            </div>
-        @endif
-    </div>
+                            class="group flex items-center justify-center p-2 focus:outline-none">
+                            <span class="h-1.5 rounded-full shadow-sm transition-all duration-500 ease-out md:h-2"
+                                :class="activeSlide === {{ $index }} ? 'w-8 md:w-10 bg-white' :
+                                    'w-1.5 md:w-2 bg-white/40 group-hover:bg-white/70'">
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
+            @endif
+        </div>
     </section>
 
     <section class="content-section bg-neutral">
@@ -154,7 +170,8 @@
             @forelse($bestSellers as $product)
                 <x-product-card :product="$product" :inlinePricing="true" />
             @empty
-                <p class="text-gray-500 italic col-span-full">Add products to your admin panel and mark them as "Best Seller" to see them here.</p>
+                <p class="col-span-full italic text-gray-500">Add products to your admin panel and mark them as "Best
+                    Seller" to see them here.</p>
             @endforelse
         </div>
     </section>
@@ -171,7 +188,8 @@
             @forelse($latestCollection as $product)
                 <x-product-card :product="$product" :inlinePricing="true" />
             @empty
-                <p class="text-gray-500 italic col-span-full">Add products to your admin panel and mark them as "New Arrival" to see them here.</p>
+                <p class="col-span-full italic text-gray-500">Add products to your admin panel and mark them as "New
+                    Arrival" to see them here.</p>
             @endforelse
         </div>
     </section>
@@ -186,42 +204,50 @@
 
         @php
             // Fetch exactly up to 4 fabrics that are marked as featured AND have an image uploaded
-            $featuredFabrics = \App\Models\Fabric::where('is_featured', true)
-                                ->whereNotNull('image')
-                                ->take(4)
-                                ->get();
+            $featuredFabrics = \App\Models\Fabric::where('is_featured', true)->whereNotNull('image')->take(4)->get();
         @endphp
 
-        @if($featuredFabrics->count() > 0)
+        @if ($featuredFabrics->count() > 0)
             <div class="fabrics-grid">
-                
-                @if(isset($featuredFabrics[0]))
+
+                @if (isset($featuredFabrics[0]))
                     <div class="fab-large">
-                        <div class="fab-img" style="background-image: url('{{ asset('storage/' . $featuredFabrics[0]->image) }}');">
-                            <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[0]->id]]) }}" class="label" style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[0]->name) }}</a>
+                        <div class="fab-img"
+                            style="background-image: url('{{ asset('storage/' . $featuredFabrics[0]->image) }}');">
+                            <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[0]->id]]) }}"
+                                class="label"
+                                style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[0]->name) }}</a>
                         </div>
                     </div>
                 @endif
 
                 <div class="fab-sidebar">
-                    
-                    @if(isset($featuredFabrics[1]))
+
+                    @if (isset($featuredFabrics[1]))
                         @php $fab1Url = asset('storage/' . $featuredFabrics[1]->image); @endphp
                         <div class="fab-img" style="background-image: url('{{ $fab1Url }}');">
-                            <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[1]->id]]) }}" class="label" style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[1]->name) }}</a>
+                            <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[1]->id]]) }}"
+                                class="label"
+                                style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[1]->name) }}</a>
                         </div>
                     @endif
 
                     <div class="fab-bottom-row">
-                        @if(isset($featuredFabrics[2]))
-                            <div class="fab-img" style="background-image: url('{{ asset('storage/' . $featuredFabrics[2]->image) }}');">
-                                <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[2]->id]]) }}" class="label" style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[2]->name) }}</a>
+                        @if (isset($featuredFabrics[2]))
+                            <div class="fab-img"
+                                style="background-image: url('{{ asset('storage/' . $featuredFabrics[2]->image) }}');">
+                                <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[2]->id]]) }}"
+                                    class="label"
+                                    style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[2]->name) }}</a>
                             </div>
                         @endif
-                        
-                        @if(isset($featuredFabrics[3]))
-                            <div class="fab-img" style="background-image: url('{{ asset('storage/' . $featuredFabrics[3]->image) }}');">
-                                <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[3]->id]]) }}" class="label" style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[3]->name) }}</a>
+
+                        @if (isset($featuredFabrics[3]))
+                            <div class="fab-img"
+                                style="background-image: url('{{ asset('storage/' . $featuredFabrics[3]->image) }}');">
+                                <a href="{{ route('shop.index', ['selectedFabrics' => [$featuredFabrics[3]->id]]) }}"
+                                    class="label"
+                                    style="text-decoration: none; display: inline-block;">{{ strtoupper($featuredFabrics[3]->name) }}</a>
                             </div>
                         @endif
                     </div>
@@ -229,7 +255,8 @@
 
             </div>
         @else
-            <p class="text-gray-500 italic text-center py-10">Add fabric images in the admin panel and mark them as "Feature on Homepage" to see them here.</p>
+            <p class="py-10 text-center italic text-gray-500">Add fabric images in the admin panel and mark them as
+                "Feature on Homepage" to see them here.</p>
         @endif
     </section>
 
@@ -239,10 +266,14 @@
                 <p class="subtitle">Established With 20 Years Of Experience</p>
                 <h2>Crafting designs that bring brands to life.</h2>
                 <p class="heritage-description">
-                    Built on two decades of expertise, Alpha Digital combines creativity, advanced digital printing, and skilled craftsmanship to deliver exceptional results. Led by experienced partners and powered by in-house production, we ensure every project reflects quality, precision, and innovation from concept to completion.
+                    Built on two decades of expertise, Alpha Digital combines creativity, advanced digital printing, and
+                    skilled craftsmanship to deliver exceptional results. Led by experienced partners and powered by
+                    in-house production, we ensure every project reflects quality, precision, and innovation from
+                    concept to completion.
                 </p>
                 <div class="heritage-cta">
-                    <a href="{{ route('shop.about') }}" wire:navigate class="btn-heritage inline-block text-center" style="line-height: inherit; text-decoration: none;">OUR JOURNEY</a>
+                    <a href="{{ route('shop.about') }}" wire:navigate class="btn-heritage inline-block text-center"
+                        style="line-height: inherit; text-decoration: none;">OUR JOURNEY</a>
                     <div class="craft-mark">
                         <span class="gold-text">Made for Elegance</span>
                     </div>
@@ -251,10 +282,12 @@
 
             <div class="heritage-visual">
                 <div class="main-image-frame">
-                    <img src="{{ asset('images/heritage-main-opt.webp') }}" class="heritage-main-img" alt="Butterfly Saree">
+                    <img src="{{ asset('images/heritage-main-opt.webp') }}" class="heritage-main-img"
+                        alt="Butterfly Saree">
                 </div>
                 <div class="overlap-image-frame">
-                    <img src="{{ asset('images/heritage-sub.webp') }}" class="heritage-sub-img" alt="Butterfly Fabric Detail">
+                    <img src="{{ asset('images/heritage-sub.webp') }}" class="heritage-sub-img"
+                        alt="Butterfly Fabric Detail">
                 </div>
                 <div class="heritage-accent-box"></div>
             </div>
@@ -264,49 +297,49 @@
     <section id="contact" class="contact-section">
         <div class="contact-container">
             <div class="contact-grid">
-                
+
                 @php
                     $settings = \App\Models\Setting::getSiteSettings();
                 @endphp
-                
+
                 <div class="contact-info">
                     <div class="contact-underlap">CONTACT</div>
-                    
+
                     <p class="subtitle">GET IN TOUCH</p>
                     <h2>We'd love to hear from you.</h2>
-                    
+
                     <div class="contact-details">
-                        @if($settings && $settings->contact_address)
+                        @if ($settings && $settings->contact_address)
                             <div class="detail-item">
                                 <h4>Our Address</h4>
                                 <p>{!! nl2br(e($settings->contact_address)) !!}</p>
                             </div>
                         @endif
-                        
-                        @if($settings && ($settings->contact_email || $settings->contact_phone))
+
+                        @if ($settings && ($settings->contact_email || $settings->contact_phone))
                             <div class="detail-item">
                                 <h4>Contact Us</h4>
                                 <p>
-                                    @if($settings->contact_email)
+                                    @if ($settings->contact_email)
                                         {{ $settings->contact_email }}
                                     @endif
-                                    
-                                    @if($settings->contact_email && $settings->contact_phone)
+
+                                    @if ($settings->contact_email && $settings->contact_phone)
                                         <br>
                                     @endif
-                                    
-                                    @if($settings->contact_phone)
+
+                                    @if ($settings->contact_phone)
                                         {{ $settings->contact_phone }}
                                     @endif
                                 </p>
                             </div>
                         @endif
                     </div>
-                    
-                    
+
+
                 </div>
 
-<!-- Contact Form Livewire Component -->
+                <!-- Contact Form Livewire Component -->
                 <livewire:contact-form />
 
             </div>

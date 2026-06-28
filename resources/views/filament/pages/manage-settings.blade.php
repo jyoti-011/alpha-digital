@@ -1,10 +1,10 @@
 <x-filament-panels::page>
     <form wire:submit="save">
-        
+
         {{ $this->form }}
 
         <div class="mt-6 flex gap-3">
-            @if(! $this->isEditing)
+            @if (!$this->isEditing)
                 <x-filament::button type="button" wire:click="enableEditing" size="lg" icon="heroicon-o-pencil">
                     Edit Settings
                 </x-filament::button>
@@ -18,6 +18,6 @@
                 </x-filament::button>
             @endif
         </div>
-        
+
     </form>
 </x-filament-panels::page>

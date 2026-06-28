@@ -1,36 +1,38 @@
 <x-filament-panels::page>
-    
+
     @livewire(\App\Filament\Widgets\TopStatsWidget::class)
 
-    <div class="mt-8 mb-4">
+    <div class="mb-4 mt-8">
         @livewire(\App\Filament\Widgets\BookingsChartWidget::class)
     </div>
 
-    <div class="mt-8 mb-2 flex items-center justify-between">
-        <h2 class="text-[16px] font-bold text-gray-600 flex items-center gap-2 uppercase tracking-wide">
-            <x-heroicon-o-presentation-chart-line class="w-5 h-5 text-gray-400" />
+    <div class="mb-2 mt-8 flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-[16px] font-bold uppercase tracking-wide text-gray-600">
+            <x-heroicon-o-presentation-chart-line class="h-5 w-5 text-gray-400" />
             Booking Analytics
         </h2>
-        <select class="text-sm border-gray-200 rounded-md shadow-sm text-gray-600 focus:ring-primary-500 focus:border-primary-500 py-1.5 pl-3 pr-8">
+        <select
+            class="focus:ring-primary-500 focus:border-primary-500 rounded-md border-gray-200 py-1.5 pl-3 pr-8 text-sm text-gray-600 shadow-sm">
             <option>All Time</option>
         </select>
     </div>
     @livewire(\App\Filament\Widgets\BookingAnalyticsWidget::class)
 
-    <div class="mt-8 mb-2 flex items-center justify-between">
-        <h2 class="text-[16px] font-bold text-gray-600 flex items-center gap-2 uppercase tracking-wide">
-            <x-heroicon-o-clock class="w-5 h-5 text-gray-400" />
+    <div class="mb-2 mt-8 flex items-center justify-between">
+        <h2 class="flex items-center gap-2 text-[16px] font-bold uppercase tracking-wide text-gray-600">
+            <x-heroicon-o-clock class="h-5 w-5 text-gray-400" />
             User, Queries, Reviews Analytics
         </h2>
-        <select class="text-sm border-gray-200 rounded-md shadow-sm text-gray-600 focus:ring-primary-500 focus:border-primary-500 py-1.5 pl-3 pr-8">
+        <select
+            class="focus:ring-primary-500 focus:border-primary-500 rounded-md border-gray-200 py-1.5 pl-3 pr-8 text-sm text-gray-600 shadow-sm">
             <option>All Time</option>
         </select>
     </div>
     @livewire(\App\Filament\Widgets\UserAnalyticsWidget::class)
 
-    <div class="mt-8 mb-2 flex items-center justify-start">
-        <h2 class="text-[16px] font-bold text-gray-600 flex items-center gap-2 uppercase tracking-wide">
-            <x-heroicon-o-users class="w-5 h-5 text-gray-400" />
+    <div class="mb-2 mt-8 flex items-center justify-start">
+        <h2 class="flex items-center gap-2 text-[16px] font-bold uppercase tracking-wide text-gray-600">
+            <x-heroicon-o-users class="h-5 w-5 text-gray-400" />
             Users Overview
         </h2>
     </div>

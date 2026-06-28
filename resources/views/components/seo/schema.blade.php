@@ -1,7 +1,7 @@
 @props(['type', 'data' => null])
 
-@if($type === 'product' && $data)
-<script type="application/ld+json">
+@if ($type === 'product' && $data)
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org/",
   "@type": "Product",
@@ -26,7 +26,7 @@
 }
 </script>
 @elseif($type === 'organization')
-<script type="application/ld+json">
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -41,7 +41,7 @@
 }
 </script>
 @elseif($type === 'category' && $data)
-<script type="application/ld+json">
+    <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "CollectionPage",

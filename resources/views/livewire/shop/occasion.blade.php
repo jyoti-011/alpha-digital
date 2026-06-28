@@ -1,4 +1,3 @@
-
 <main class="occasion-container">
     <div class="page-header">
         <p class="subtitle">CURATED COLLECTIONS</p>
@@ -12,7 +11,7 @@
             'https://images.unsplash.com/photo-1610030469915-055106670868?auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&q=80',
             'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80',
-            'https://images.unsplash.com/photo-1544441893-675973eebb39?auto=format&fit=crop&q=80'
+            'https://images.unsplash.com/photo-1544441893-675973eebb39?auto=format&fit=crop&q=80',
         ];
     @endphp
 
@@ -22,16 +21,13 @@
             $occProducts = $productsByOccasion->get($occasion->name, collect());
         @endphp
 
-        @if($occProducts->count() > 0)
+        @if ($occProducts->count() > 0)
             @php
-                $occasionImage = $occasion->image ? asset('storage/' . $occasion->image) : $featureImages[$index % count($featureImages)];
+                $occasionImage = $occasion->image
+                    ? asset('storage/' . $occasion->image)
+                    : $featureImages[$index % count($featureImages)];
             @endphp
-            <x-editorial-slider 
-                :title="$occasion->name" 
-                :image="$occasionImage" 
-                :products="$occProducts" 
-                :shopLink="route('shop.index', ['occasion' => $occasion->name])"
-            />
+            <x-editorial-slider :title="$occasion->name" :image="$occasionImage" :products="$occProducts" :shopLink="route('shop.index', ['occasion' => $occasion->name])" />
         @endif
     @empty
         <div style="text-align: center; padding: 4rem 0;">

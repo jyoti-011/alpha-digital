@@ -1,70 +1,76 @@
 <profile-layout>
-<x-layouts.app>
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pt-[140px] md:pt-[160px]">
-        <div class="flex flex-col md:flex-row gap-8">
-            
-            {{-- Sidebar --}}
-            <div class="w-full md:w-1/4 shrink-0">
-                <div class="bg-surface_lowest border border-outline_variant/50 rounded-sm">
-                    {{-- User Info Header --}}
-                    <div class="p-6 border-b border-outline_variant/50">
-                        <h2 class="text-lg font-bold text-secondary m-0 uppercase tracking-wide font-serif">
-                            {{ auth('customer')->user()->name ?? 'User Name' }}
-                        </h2>
-                        <p class="text-sm text-tertiary mt-1 m-0 font-sans">
-                            {{ auth('customer')->user()->email ?? '' }}
-                        </p>
+    <x-layouts.app>
+        <div class="mx-auto max-w-7xl px-4 py-10 pt-[140px] sm:px-6 md:pt-[160px] lg:px-8">
+            <div class="flex flex-col gap-8 md:flex-row">
+
+                {{-- Sidebar --}}
+                <div class="w-full shrink-0 md:w-1/4">
+                    <div class="rounded-sm border border-outline_variant/50 bg-surface_lowest">
+                        {{-- User Info Header --}}
+                        <div class="border-b border-outline_variant/50 p-6">
+                            <h2 class="m-0 font-serif text-lg font-bold uppercase tracking-wide text-secondary">
+                                {{ auth('customer')->user()->name ?? 'User Name' }}
+                            </h2>
+                            <p class="m-0 mt-1 font-sans text-sm text-tertiary">
+                                {{ auth('customer')->user()->email ?? '' }}
+                            </p>
+                        </div>
+
+                        {{-- Navigation Links --}}
+                        <nav class="flex flex-col py-2 font-sans">
+                            <a href="{{ route('profile.account') }}"
+                                class="{{ request()->routeIs('profile.account') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }} flex items-center justify-between border-l-2 px-6 py-4 text-sm font-medium transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="user" class="h-4 w-4"></i>
+                                    Account Details
+                                </div>
+                                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400"></i>
+                            </a>
+
+                            <a href="{{ route('profile.orders') }}"
+                                class="{{ request()->routeIs('profile.orders*') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }} flex items-center justify-between border-l-2 px-6 py-4 text-sm font-medium transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="package" class="h-4 w-4"></i>
+                                    Orders
+                                </div>
+                                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400"></i>
+                            </a>
+
+                            <a href="{{ route('profile.addresses') }}"
+                                class="{{ request()->routeIs('profile.addresses') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }} flex items-center justify-between border-l-2 px-6 py-4 text-sm font-medium transition-colors">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="map-pin" class="h-4 w-4"></i>
+                                    Addresses
+                                </div>
+                                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400"></i>
+                            </a>
+
+                            <a href="{{ route('wishlist') }}"
+                                class="flex items-center justify-between border-l-2 border-transparent px-6 py-4 text-sm font-medium text-tertiary transition-colors hover:bg-surface_low hover:text-primary">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="heart" class="h-4 w-4"></i>
+                                    Wishlist
+                                </div>
+                                <i data-lucide="chevron-right" class="h-4 w-4 text-gray-400"></i>
+                            </a>
+
+                            <form method="POST" action="{{ route('customer.logout') }}"
+                                class="m-0 mt-2 border-t border-outline_variant/50 p-0">
+                                @csrf
+                                <button type="submit"
+                                    class="flex w-full cursor-pointer items-center justify-between border-l-2 border-transparent bg-transparent px-6 py-4 text-left text-sm font-medium text-tertiary outline-none transition-colors hover:bg-surface_low hover:text-primary">
+                                    <span>Sign Out</span>
+                                </button>
+                            </form>
+                        </nav>
                     </div>
-
-                    {{-- Navigation Links --}}
-                    <nav class="flex flex-col py-2 font-sans">
-                        <a href="{{ route('profile.account') }}" class="flex items-center justify-between px-6 py-4 text-sm font-medium transition-colors border-l-2 {{ request()->routeIs('profile.account') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }}">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="user" class="w-4 h-4"></i>
-                                Account Details
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                        </a>
-
-                        <a href="{{ route('profile.orders') }}" class="flex items-center justify-between px-6 py-4 text-sm font-medium transition-colors border-l-2 {{ request()->routeIs('profile.orders*') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }}">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="package" class="w-4 h-4"></i>
-                                Orders
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                        </a>
-
-                        <a href="{{ route('profile.addresses') }}" class="flex items-center justify-between px-6 py-4 text-sm font-medium transition-colors border-l-2 {{ request()->routeIs('profile.addresses') ? 'border-primary text-primary bg-surface' : 'border-transparent text-tertiary hover:bg-surface_low hover:text-primary' }}">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="map-pin" class="w-4 h-4"></i>
-                                Addresses
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                        </a>
-
-                        <a href="{{ route('wishlist') }}" class="flex items-center justify-between px-6 py-4 text-sm font-medium transition-colors border-l-2 border-transparent text-tertiary hover:bg-surface_low hover:text-primary">
-                            <div class="flex items-center gap-3">
-                                <i data-lucide="heart" class="w-4 h-4"></i>
-                                Wishlist
-                            </div>
-                            <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
-                        </a>
-
-                        <form method="POST" action="{{ route('customer.logout') }}" class="m-0 p-0 border-t border-outline_variant/50 mt-2">
-                            @csrf
-                            <button type="submit" class="w-full flex items-center justify-between px-6 py-4 text-sm font-medium transition-colors border-l-2 border-transparent text-tertiary hover:bg-surface_low hover:text-primary text-left outline-none bg-transparent cursor-pointer">
-                                <span>Sign Out</span>
-                            </button>
-                        </form>
-                    </nav>
                 </div>
-            </div>
 
-            {{-- Main Content Slot --}}
-            <div class="w-full md:w-3/4">
-                {{ $slot }}
+                {{-- Main Content Slot --}}
+                <div class="w-full md:w-3/4">
+                    {{ $slot }}
+                </div>
+
             </div>
-            
         </div>
-    </div>
-</x-layouts.app>
+    </x-layouts.app>
